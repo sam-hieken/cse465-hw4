@@ -179,6 +179,7 @@ public class Hw4 {
             }
         }
 
+        // Write the states corresponding to each city into the file.
         using (StreamWriter writer = new StreamWriter("CityStates.txt"))
         {
             foreach (KeyValuePair<string, HashSet<string>> pair in cityStates) {
