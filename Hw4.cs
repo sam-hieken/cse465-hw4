@@ -165,6 +165,7 @@ public class Hw4 {
         List<string> cities = ReadFile("cities.txt").Select(s => s.ToLower()).ToList();;
         Dictionary<string, HashSet<string>> cityStates = new Dictionary<string, HashSet<string>>();
 
+
         foreach (Area area in areas)
         {
             // Is this a city we want to write states for?
