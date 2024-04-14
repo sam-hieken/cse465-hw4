@@ -191,6 +191,8 @@ public class Hw4 {
         }
     }
 
+    // Get the cities with common names in different states.
+    // If "states" is passed, only cities in those states will be considered.
     public static List<string> GetCommonCityNames(List<Area> areas, List<string> states = null) {
         HashSet<string> commonCityNames = new HashSet<string>();
         Dictionary<string, string> cities = new Dictionary<string, string>();
