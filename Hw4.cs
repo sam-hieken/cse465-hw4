@@ -142,7 +142,52 @@ public class Hw4 {
         return areas;
     }
 
-    
+    public static void WriteLatLong(List<Area> areas) {
+        List<string> zips = ReadFile("zips.txt");
+        Dictionary<string, string> zipsFound = new Dictionary<string, string>();
+
+        foreach (Area area in areas)
+        {
+            // If the zip is in the list and not already found, add it.
+            if (zips.Contains(area.Zipcode)
+                && !zipsFound.ContainsKey(area.Zipcode))
+                zipsFound[area.Zipcode] = $"{area.Lat} {area.Long}";
+        }
+
+        using (StreamWriter writer = new StreamWriter("LatLon.txt"))
+        {
+            foreach (KeyValuePair<string, string> pair in zipsFound)
+                writer.WriteLine($"{pair.Value}");
+        }
+    }
+
+    public static void WriteCityStates(List<Area> areas) {
+        List<string> cities = ReadFile("cities.txt").Select(s => s.ToLower()).ToList();;
+        Dictionary<string, HashSet<string>> cityStates = new Dictionary<string, HashSet<string>>();
+
+        foreach (Area area in areas)
+        {
+            // Is this a city we want to write states for?
+            if (cities.Contains(area.City.ToLower()))
+            {
+                // Create new HashSet for this city if we haven't seen it yet.
+                if (!cityStates.ContainsKey(area.City))
+                    cityStates[area.City] = new HashSet<string>();
+
+                cityStates[area.City].Add(area.State);
+            }
+        }
+
+        using (StreamWriter writer = new StreamWriter("CityStates.txt"))
+        {
+            foreach (KeyValuePair<string, HashSet<string>> pair in cityStates) {
+                foreach (string state in pair.Value)
+                    writer.Write($"{state} ");
+                
+                writer.WriteLine();
+            }
+        }
+    }
 
     public static List<string> GetCommonCityNames(List<Area> areas, List<string> states = null) {
         HashSet<string> commonCityNames = new HashSet<string>();
