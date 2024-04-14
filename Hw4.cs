@@ -70,7 +70,7 @@ public class Hw4 {
         WriteLatLong(areas);
         WriteCityStates(areas);
 
-        const AreaID testID = ~areas[20];
+        AreaID testID = ~areas[20];
         Console.WriteLine($"Testing ID: {testID}");
         
 
