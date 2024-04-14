@@ -6,7 +6,7 @@
   You are free to create as many classes within the Hw4.cs file or across 
   multiple files as you need. However, ensure that the Hw4.cs file is the 
   only one that contains a Main method. This method should be within a 
-  class named hw4. This specific setup is crucial because your instructor 
+  class named hw4. This specific HashSetup is crucial because your instructor 
   will use the hw4 class to execute and evaluate your work.
   */
   // BONUS POINT:
@@ -15,9 +15,38 @@
   
 
 using System;
+using System.Collections.Generic;
+using System.IO;
 
-public class Hw4
-{
+namespace Main {
+public class Area {
+    public int RecordNumber { get; set; }
+    public string Zipcode { get; set; }
+    public string ZipCodeType { get; set; }
+    public string City { get; set; }
+    public string State { get; set; }
+    public string LocationType { get; set; }
+    public double? Lat { get; set; }
+    public double? Long { get; set; }
+    public double Xaxis { get; set; }
+    public double Yaxis { get; set; }
+    public double Zaxis { get; set; }
+    public string WorldRegion { get; set; }
+    public string Country { get; set; }
+    public string LocationText { get; set; }
+    public string Location { get; set; }
+    public bool Decommisioned { get; set; }
+    public int? TaxReturnsFiled { get; set; }
+    public int? EstimatedPopulation { get; set; }
+    public int? TotalWages { get; set; }
+
+    // ToString
+    public override string ToString()
+    {
+        return $"Area(RecordNumber: {RecordNumber}, Zipcode: {Zipcode}, ZipCodeType: {ZipCodeType}, City: {City}, State: {State}, LocationType: {LocationType}, Lat: {Lat}, Long: {Long}, Xaxis: {Xaxis}, Yaxis: {Yaxis}, Zaxis: {Zaxis}, WorldRegion: {WorldRegion}, Country: {Country}, LocationText: {LocationText}, Location: {Location}, Decommisioned: {Decommisioned}, TaxReturnsFiled: {TaxReturnsFiled}, EstimatedPopulation: {EstimatedPopulation}, TotalWages: {TotalWages})";
+    }
+}
+public class Hw4 {
     public static void Main(string[] args)
     {
         // Capture the start time
@@ -31,12 +60,8 @@ public class Hw4
 
 
 
-
-        // TODO: your code goes here
-
-
-
-
+        List<Area> areas = GetAreas("zipcodes.txt");
+        WriteCommonCityNames(areas);
         
 
         // ============================
@@ -53,4 +78,81 @@ public class Hw4
         // Display the elapsed time in milliseconds
         Console.WriteLine($"Elapsed Time: {elapsedTime.TotalMilliseconds} ms");
     }
+
+    public static List<Area> GetAreas(string file) {
+        List<Area> areas = new List<Area>();
+        
+        using (StreamReader reader = new StreamReader(file))
+        {
+            // Skip the header
+            string line = reader.ReadLine();
+
+            while ((line = reader.ReadLine()) != null)
+            {
+                char[] split = new char[] { '\t' };
+                string[] parts = line.Split(split, StringSplitOptions.None);
+
+                Area area = new Area
+                {
+                    RecordNumber = int.Parse(parts[0]),
+                    Zipcode = parts[1],
+                    ZipCodeType = parts[2],
+                    City = parts[3],
+                    State = parts[4],
+                    LocationType = parts[5],
+                    Lat = parts[6] == "" ? null : (double?)double.Parse(parts[6]),
+                    Long = parts[7] == "" ? null : (double?)double.Parse(parts[7]),
+                    Xaxis = double.Parse(parts[8]),
+                    Yaxis = double.Parse(parts[9]),
+                    Zaxis = double.Parse(parts[10]),
+                    WorldRegion = parts[11],
+                    Country = parts[12],
+                    LocationText = parts[13],
+                    Location = parts[14],
+                    Decommisioned = parts[15] == "TRUE",
+                    TaxReturnsFiled = parts[16] == "" ? null : (int?)int.Parse(parts[16]),
+                    EstimatedPopulation = parts[17] == "" ? null : (int?)int.Parse(parts[17]),
+                    TotalWages = parts[18] == "" ? null : (int?)int.Parse(parts[18])
+                };
+                
+                areas.Add(area);
+            }
+        }
+
+        return areas;
+    }
+
+    public static List<string> GetCommonCityNames(List<Area> areas, List<string> states = null) {
+        HashSet<string> commonCityNames = new HashSet<string>();
+        Dictionary<string, string> cities = new Dictionary<string, string>();
+
+        foreach (Area area in areas)
+        {
+            if (states != null && !states.Contains(area.State))
+                continue;
+
+            else if (!cities.ContainsKey(area.City))
+                cities[area.City] = area.State;
+            
+            else if (cities[area.City] != area.State)
+                commonCityNames.Add(area.City);
+        }
+
+        List<string> sortedCommonCities = new List<string>(commonCityNames);
+        sortedCommonCities.Sort();
+
+        return sortedCommonCities;
+    }
+
+    public static void WriteCommonCityNames(List<Area> areas) {
+        List<string> commonCityNames = GetCommonCityNames(areas, new List<string> { "OH", "MI" });
+
+        // Write city names to file
+        using (StreamWriter writer = new StreamWriter("CommonCityNames.txt"))
+        {
+            foreach (string city in commonCityNames)
+                writer.WriteLine(city);
+        }
+    }
+}
 }
