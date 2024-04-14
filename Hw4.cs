@@ -17,10 +17,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+
+using AreaID = System.Int32;
 
 namespace Main {
 public class Area {
-    public int RecordNumber { get; set; }
+    public AreaID RecordNumber { get; set; }
     public string Zipcode { get; set; }
     public string ZipCodeType { get; set; }
     public string City { get; set; }
@@ -40,6 +43,11 @@ public class Area {
     public int? EstimatedPopulation { get; set; }
     public int? TotalWages { get; set; }
 
+    // ~area = area's record number
+    public static int operator ~(Area area) {
+        return area.RecordNumber;
+    }
+
     // ToString
     public override string ToString()
     {
@@ -57,11 +65,13 @@ public class Hw4 {
         // Main method
         // ============================
 
-
-
-
         List<Area> areas = GetAreas("zipcodes.txt");
         WriteCommonCityNames(areas);
+        WriteLatLong(areas);
+        WriteCityStates(areas);
+
+        const AreaID testID = ~areas[20];
+        Console.WriteLine($"Testing ID: {testID}");
         
 
         // ============================
@@ -79,48 +89,60 @@ public class Hw4 {
         Console.WriteLine($"Elapsed Time: {elapsedTime.TotalMilliseconds} ms");
     }
 
-    public static List<Area> GetAreas(string file) {
-        List<Area> areas = new List<Area>();
-        
+    private static List<string> ReadFile(string file) {
+        List<string> lines = new List<string>();
         using (StreamReader reader = new StreamReader(file))
         {
-            // Skip the header
-            string line = reader.ReadLine();
-
+            string line;
             while ((line = reader.ReadLine()) != null)
-            {
-                char[] split = new char[] { '\t' };
-                string[] parts = line.Split(split, StringSplitOptions.None);
+                lines.Add(line);
+        }
+        
+        return lines;
+    }
 
-                Area area = new Area
-                {
-                    RecordNumber = int.Parse(parts[0]),
-                    Zipcode = parts[1],
-                    ZipCodeType = parts[2],
-                    City = parts[3],
-                    State = parts[4],
-                    LocationType = parts[5],
-                    Lat = parts[6] == "" ? null : (double?)double.Parse(parts[6]),
-                    Long = parts[7] == "" ? null : (double?)double.Parse(parts[7]),
-                    Xaxis = double.Parse(parts[8]),
-                    Yaxis = double.Parse(parts[9]),
-                    Zaxis = double.Parse(parts[10]),
-                    WorldRegion = parts[11],
-                    Country = parts[12],
-                    LocationText = parts[13],
-                    Location = parts[14],
-                    Decommisioned = parts[15] == "TRUE",
-                    TaxReturnsFiled = parts[16] == "" ? null : (int?)int.Parse(parts[16]),
-                    EstimatedPopulation = parts[17] == "" ? null : (int?)int.Parse(parts[17]),
-                    TotalWages = parts[18] == "" ? null : (int?)int.Parse(parts[18])
-                };
-                
-                areas.Add(area);
-            }
+    public static List<Area> GetAreas(string file) {
+        List<Area> areas = new List<Area>();
+        List<string> lines = ReadFile(file);
+        
+        // Skip header
+        for (int i = 1; i < lines.Count; i++)
+        {
+            string line = lines[i];
+            
+            char[] split = new char[] { '\t' };
+            string[] parts = line.Split(split, StringSplitOptions.None);
+
+            Area area = new Area
+            {
+                RecordNumber = int.Parse(parts[0]),
+                Zipcode = parts[1],
+                ZipCodeType = parts[2],
+                City = parts[3],
+                State = parts[4],
+                LocationType = parts[5],
+                Lat = parts[6] == "" ? null : (double?)double.Parse(parts[6]),
+                Long = parts[7] == "" ? null : (double?)double.Parse(parts[7]),
+                Xaxis = double.Parse(parts[8]),
+                Yaxis = double.Parse(parts[9]),
+                Zaxis = double.Parse(parts[10]),
+                WorldRegion = parts[11],
+                Country = parts[12],
+                LocationText = parts[13],
+                Location = parts[14],
+                Decommisioned = parts[15] == "TRUE",
+                TaxReturnsFiled = parts[16] == "" ? null : (int?)int.Parse(parts[16]),
+                EstimatedPopulation = parts[17] == "" ? null : (int?)int.Parse(parts[17]),
+                TotalWages = parts[18] == "" ? null : (int?)int.Parse(parts[18])
+            };
+            
+            areas.Add(area);
         }
 
         return areas;
     }
+
+    
 
     public static List<string> GetCommonCityNames(List<Area> areas, List<string> states = null) {
         HashSet<string> commonCityNames = new HashSet<string>();
@@ -145,7 +167,9 @@ public class Hw4 {
     }
 
     public static void WriteCommonCityNames(List<Area> areas) {
-        List<string> commonCityNames = GetCommonCityNames(areas, new List<string> { "OH", "MI" });
+        List<string> states = ReadFile("states.txt");
+
+        List<string> commonCityNames = GetCommonCityNames(areas, states);
 
         // Write city names to file
         using (StreamWriter writer = new StreamWriter("CommonCityNames.txt"))
