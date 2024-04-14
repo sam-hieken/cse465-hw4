@@ -162,10 +162,9 @@ public class Hw4 {
     }
 
     public static void WriteCityStates(List<Area> areas) {
-        List<string> cities = ReadFile("cities.txt").Select(s => s.ToLower()).ToList();;
+        List<string> cities = ReadFile("cities.txt").Select(s => s.ToLower()).ToList();
+        // Dictionary of cities mapped to every state they're in.
         Dictionary<string, HashSet<string>> cityStates = new Dictionary<string, HashSet<string>>();
-
-
 
         foreach (Area area in areas)
         {
