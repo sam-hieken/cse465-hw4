@@ -166,6 +166,7 @@ public class Hw4 {
         Dictionary<string, HashSet<string>> cityStates = new Dictionary<string, HashSet<string>>();
 
 
+
         foreach (Area area in areas)
         {
             // Is this a city we want to write states for?
